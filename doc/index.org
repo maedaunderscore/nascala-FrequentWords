@@ -1,0 +1,248 @@
+#+TITLE: なごやかScala #11 sbtの使い方とScalaによるアプリケーション実装
+#+AUTHOR: Yasuyuki Maeda(@maeda_)
+#+OPTIONS: ^:{}
+#+STYLE: <link rel="stylesheet" type="text/css" href="org-mode-document.css" />
+#+LANGUAGE: ja
+
+* 今回のポイント
+- sbt(Scala Build Tool)は、Scala本体や必要なライブラリのダウンロードをしてくれて便利
+- sbtは、コードの保存を検知して、すぐにテストを実行してくれるので便利
+- Scalaは、Javaの資産もシームレスに使えるので便利
+- REPLは、ちょっとしたコードをすぐ試せるので便利
+
+* 環境の準備
+Java JRE 1.6以降が必要です。
+プロンプトで「java -version」を実行し、
+インストールされているか、パスが通っているか、バージョンは1.6以上か、を確認してください。
+#+BEGIN_SRC text
+~/code/scala/nascala > java -version
+java version "1.6.0_37"
+Java(TM) SE Runtime Environment (build 1.6.0_37-b06-434-11M3909)
+Java HotSpot(TM) 64-Bit Server VM (build 20.12-b01-434, mixed mode)
+#+END_SRC
+
+* サンプルコードを実行する
+※初回起動時はScala本体と依存ライブラリの大量のダウンロードがあります。
+心の準備をしてください。(10〜20分くらい？)
+
+  1. サンプルコードの取得
+    #+BEGIN_SRC text
+      > git clone https://github.com/maeda-/nascala-FrequentWord.git
+      (gitがない場合はhttps://github.com/maeda-/nascala-FrequentWordからZIPをダウンロード)
+    #+END_SRC
+    
+  2. sbtの起動と実行
+    #+BEGIN_SRC text
+    > cd nascala-FrequentWord
+    > ./sbt (windowsの場合はsbt.batを実行)
+    [info] Loading project definition from /Users/maeda/code/scala/nascala/project
+    [info] Set current project to default-04b6c4 (in build file:/Users/maeda/code/scala/nascala/)
+    > run
+    #+END_SRC
+    
+  3. 実行すると、ローカルPC上でWebサーバが起動し、ブラウザでそのページを表示します。
+
+** 新しいプロジェクトを作成する場合
+sbtでは一つのプロジェクトを一つのディレクトリで管理します。[fn:c_project]
+[fn:c_project]ひとつのプロジェクトに複数のサブプロジェクトを含めることも可能です。
+
+
+新しいプロジェクトを作成する場合は下記の流れで始めます。
+   1. ディレクトリを作成する
+   2. 作成したディレクトリへ移動
+   3. sbtを実行
+
+* サンプルのファイル構成
+
+#+BEGIN_HTML
+<pre>
+nascala-FrequentWord
+├─ build.sbt                           # sbtの設定ファイル（簡易バージョン）
+├─ project                             # sbtの設定ディレクトリ
+├─ src                                 # ソースコード
+│   ├─ main          
+│   │   ├─ scala                     # 本体のコード
+│   │   │   ├── Main.scala         #   エントリポイント。Webサーバの起動など
+│   │   │   ├── Web.scala          #   Webから情報を取得する
+│   │   │   ├── Analyzer.scala     #   形態素解析をする
+│   │   │   └── Template.scala     #   HTMLを生成する
+│   │   └── resources               # cssなどのリソースファイル
+│   ├─ test                           # テストコード
+│   └─ script                         # REPLからの使用を想定した便利スクリプト
+└─ target                              # ビルドしたものなどが入る
+
+</pre>
+#+END_HTML
+
+* sbt command
+
+以下はsbt起動後のプロンプトから使用可能なコマンド例です。
+
+| コマンド                                          | 動作                                                                      |
+|---------------------------------------------------+---------------------------------------------------------------------------|
+| run                                               | main関数を実行                                                            |
+| test                                              | テストを実行                                                              |
+| test-only nascala.CountingByScalaCheck            | 指定されたテストだけを実行。*などのワイルドカードも使用可能               |
+| console                                           | REPLを起動                                                                |
+| reload                                            | sbtの設定を再読み込み                                                     |
+| compile                                           | コンパイルを実行                                                          |
+| set scalacOptions += "-feature"                   | 一時的にWarningの詳細を確認するコンパイルオプションを追加[fn:deprecation] |
+| set scalacOptions += "-deprecation"               | 一時的にWarningの詳細を確認するコンパイルオプションを追加[fn:deprecation] |
+| set scalaVersion := "2.10.1"                      | 一時的にScalaのバージョンを設定                                           |
+| set libraryDependencies += "..." %% "..." % "..." | 一時的に使用するライブラリを追加                                          |
+| session list                                      | 一時的に設定したものを確認                                                |
+| session save                                      | session listの内容をbuild.sbtに保存                                       |
+| session remove n (nは数字)                        | session listの内容のn番目を削除                                           |
+
+[fn:deprecation]
+明示的な有効化が必要な機能や使用が推奨されていない機能を使用した場合に警告やエラーが発生します。
+詳細を確認する場合はコンパイルオプションを設定して、警告の詳細が確認可能です。
+#+BEGIN_SRC text
+> console
+Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
+Type in expressions to have them evaluated.
+Type :help for more information.
+scala> 1 toString
+warning: there were 1 feature warning(s); re-run with -feature for details
+res0: String = 1
+scala> :quit
+> set scalacOptions += "-feature"
+> console
+Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
+Type in expressions to have them evaluated.
+Type :help for more information.
+scala> 1 toString
+<console>:11: warning: postfix operator toString should be enabled
+by making the implicit value language.postfixOps visible.
+This can be achieved by adding the import clause 'import scala.language.postfixOps'
+or by setting the compiler option -language:postfixOps.
+See the Scala docs for value scala.language.postfixOps for a discussion
+why the feature should be explicitly enabled.
+              1 toString
+                ^
+res0: String = 1
+#+END_SRC
+
+** 継続実行する
+コマンドの前に'~'(チルダ)をつけると、コマンドを継続実行します。
+改行で待ち受け状態をやめて、プロンプトに戻ります。
+#+BEGIN_SRC text
+> ~test
+... (テストが実行される) ...
+[info] Passed: : Total 9, Failed 0, Errors 0, Passed 9, Skipped 0
+[success] Total time: 2 s, completed 2013/03/31 15:35:49
+1. Waiting for source changes... (press enter to interrupt)
+... (コードの変更待ち) ...
+... (コードが保存されると、テストが実行される) ...
+[info] Passed: : Total 9, Failed 0, Errors 0, Passed 9, Skipped 0
+[success] Total time: 2 s, completed 2013/03/31 15:35:49
+1. Waiting for source changes... (press enter to interrupt)
+... (Enterを入力) ...
+>
+#+END_SRC
+
+* sbtの設定ファイル
+簡単に設定を行う場合はbuild.sbtを、込み入った設定を行う場合はproject/build.scalaに設定を記述します。
+サンプルではbuild.sbtを使用しています。
+
+** build.sbt
+build.sbtはプロジェクトのディレクトリ直下に配置します。
+設定の間には必ず空行が必要です。
+設定例はサンプルコードのbuild.sbtを参照してください。コメントに説明を記載してあります。
+
+* REPL(Read Eval and Print Loop)
+sbtのプロンプトでcosoleコマンドを実行すると、
+プロジェクトで使用するライブラリやコードがクラスパスに追加された状態でREPLが起動します。[fn:c_console]
+ライブラリやコードの動きを確認する場合に便利です。
+
+[fn:c_console]
+consoleを実行すると、REPL起動前にコンパイルが実行されます。ここでコンパイルエラーになるとREPLが起動しません。
+console-quickを使うと、コンパイルをせず、クラスパスの追加なしでREPLを起動します。
+しかし、サンプルコードではREPL起動時にnascalaパッケージをインポートするようにsbtで設定しているため、
+クラスパスを追加しないとエラーが発生し、REPLが起動できません。
+
+REPLで実行したコードは、ホームディレクトリの.scala_historyに保存されます。
+REPLを終了する場合、:quitと入力するか、Ctrl+Dを押します。
+
+** REPLの特殊なコマンド
+REPL上で実行可能な:で始まる特殊なコマンドがあります。
+
+| コマンド                       | 動作                                 |
+|--------------------------------+--------------------------------------|
+| :load src/main/scala/Web.scala | scalaのコードを読み込む              |
+| :paste                         | 複数行入力するためのモードに入ります |
+| :help                          | ヘルプを見る                         |
+
+** REPLのキービンド
+ScalaのREPLはEmacs風のキーバインドになっています。
+| キーストローク | 動作                                       |
+|----------------+--------------------------------------------|
+| Ctrl + f       | →                                         |
+| Ctrl + b       | ←                                         |
+| Ctrl + p       | 実行したコマンド履歴の一つ前に戻る         |
+| Ctrl + n       | 実行したコマンド履歴の一つ先に進める       |
+| Ctrl + a       | 行頭に移動                                 |
+| Ctrl + e       | 行末に移動                                 |
+| Ctrl + r       | コマンド履歴からインクリメンタルサーチ     |
+| Meta + f       | 1単語進む                                  |
+| Meta + b       | 1単語戻る                                  |
+| Ctrl + k       | カーソル位置から行末まで削除               |
+| Ctrl + y       | *** 押しちゃ駄目だ！ *** [fn:c_yank]    |
+|                |                                            |
+
+[fn:c_yank]
+Ctrl + yでヤンク(ペースト)すると思いきや、sbtがバックグランド実行になって、シェルに戻ってしまいます。
+fgコマンドで復帰できますが、その後のショートカットキーの動作がおかしくなってしまいます。
+(解決方法を知っている方がいたら、教えてください。)
+
+* ライブラリやサンプルコードをREPLから触ってみる
+** Webページを取得(dispatch + jsoup)
+#+BEGIN_SRC scala
+# 指定されたURLにアクセスして文字列として取得
+scala> import dispatch.classic._
+scala> val resp = Http(url("http://www.google.co.jp").as_str)
+scala> println(resp)
+
+# JSoupラッパーを使う
+scala> import dispatch.classic.jsoup.JSoupHttp._
+scala> val resp = Http(url("http://www.scala-lang.org/node/27499").as_jsouped)
+scala> resp.select("div").size)
+scala> import scala.collection.JavaConverters._
+scala> resp.select("#CommunityProjects ~ p ~ ul li strong").asScala.map(_.text)
+
+# src/main/scala/Web.scalaのコードを呼ぶ
+scala> val resp = Web.extract("http://www.scala-lang.org/node/27499", "#CommunityProjects ~ p ~ ul li strong")
+scala> println(resp)
+#+END_SRC
+
+** 形態素解析(kuromoji)
+#+BEGIN_SRC scala
+scala> import org.atilika.kuromoji._
+scala> import scala.collection.JavaConverters._
+scala> val tokenizer = Tokenizer.builder().build()
+scala> val result = tokenizer.tokenize("すもももももももものうち").asScala
+scala> result map (t => (t.getSurfaceForm, t.getAllFeatures)) foreach println
+scala> val token = result.head
+scala> token.(ここでタブを打つと補完候補が表示される)
+
+# src/main/scala/Analyzer.scalaのコードを呼ぶ
+scala> val result = Analyzer.tokenize("記者が汽車で帰社した")
+scala> result.filter(Analyzer.isNoun).distinct
+#+END_SRC
+
+** HTMLを生成
+src/script/Util.scalaにHTML確認用コードを用意しています。
+
+sbtを２つ起動して一つでrunコマンドからサーバーを起動します。
+もうひとつのsbtでconsoleからREPLを起動し、Util.writeメソッドでtemp.htmlに出力されます。
+ブラウザでhttp://localhost:(port)/resources/temp.htmlを開くと出力したページを確認できます。
+
+#+BEGIN_SRC scala
+scala> :load src/script/Util.scala
+Loading src/script/Util.scala...
+defined module Util
+
+scala> val result = Seq(Word("foo", 4), Word("bar", 1))
+scala> Util.show(Template.frequentWordPage("hoge")(result)
+(別のsbtでサーバを起動した状態で、ブラウザから/resources/temp.htmlを見ると生成したページが表示されます)
+#+END_SRC
