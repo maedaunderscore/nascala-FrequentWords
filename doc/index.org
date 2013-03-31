@@ -27,13 +27,13 @@ Java HotSpot(TM) 64-Bit Server VM (build 20.12-b01-434, mixed mode)
 
   1. サンプルコードの取得
     #+BEGIN_SRC text
-      > git clone https://github.com/maeda-/nascala-FrequentWord.git
-      (gitがない場合はhttps://github.com/maeda-/nascala-FrequentWordからZIPをダウンロード)
+      > git clone https://github.com/maeda-/nascala-FrequentWords.git
+      (gitがない場合はhttps://github.com/maeda-/nascala-FrequentWordsからZIPをダウンロード)
     #+END_SRC
     
   2. sbtの起動と実行
     #+BEGIN_SRC text
-    > cd nascala-FrequentWord
+    > cd nascala-FrequentWords
     > ./sbt (windowsの場合はsbt.batを実行)
     [info] Loading project definition from /Users/maeda/code/scala/nascala/project
     [info] Set current project to default-04b6c4 (in build file:/Users/maeda/code/scala/nascala/)
@@ -56,7 +56,7 @@ sbtでは一つのプロジェクトを一つのディレクトリで管理し�
 
 #+BEGIN_HTML
 <pre>
-nascala-FrequentWord
+nascala-FrequentWords
 ├─ build.sbt                           # sbtの設定ファイル（簡易バージョン）
 ├─ project                             # sbtの設定ディレクトリ
 ├─ src                                 # ソースコード
