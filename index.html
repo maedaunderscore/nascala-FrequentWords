@@ -291,38 +291,6 @@ nascala-FrequentWords
 </tbody>
 </table>
 
-
-
-
-<pre class="example">&gt; console
-Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
-Type in expressions to have them evaluated.
-Type :help for more information.
-scala&gt; 1 toString
-warning: there were 1 feature warning(s); re-run with -feature for details
-res0: String = 1
-scala&gt; :quit
-&gt; set scalacOptions += "-feature"
-&gt; console
-Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
-Type in expressions to have them evaluated.
-Type :help for more information.
-scala&gt; 1 toString
-&lt;console&gt;:11: warning: postfix operator toString should be enabled
-by making the implicit value language.postfixOps visible.
-This can be achieved by adding the import clause 'import scala.language.postfixOps'
-or by setting the compiler option -language:postfixOps.
-See the Scala docs for value scala.language.postfixOps for a discussion
-why the feature should be explicitly enabled.
-              1 toString
-                ^
-res0: String = 1
-</pre>
-
-
-
-
-
 </div>
 
 <div id="outline-container-5.1" class="outline-3">
@@ -558,6 +526,30 @@ scala&gt; Util.show(Template.frequentWordPage("hoge")(result))
 <p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 明示的な有効化が必要な機能や使用が推奨されていない機能を使用した場合に警告やエラーが発生します。
 詳細を確認する場合はコンパイルオプションを設定して、警告の詳細が確認可能です。
 </p>
+<pre class="example">&gt; console
+Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
+Type in expressions to have them evaluated.
+Type :help for more information.
+scala&gt; 1 toString
+warning: there were 1 feature warning(s); re-run with -feature for details
+res0: String = 1
+scala&gt; :quit
+&gt; set scalacOptions += "-feature"
+&gt; console
+Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
+Type in expressions to have them evaluated.
+Type :help for more information.
+scala&gt; 1 toString
+&lt;console&gt;:11: warning: postfix operator toString should be enabled
+by making the implicit value language.postfixOps visible.
+This can be achieved by adding the import clause 'import scala.language.postfixOps'
+or by setting the compiler option -language:postfixOps.
+See the Scala docs for value scala.language.postfixOps for a discussion
+why the feature should be explicitly enabled.
+              1 toString
+                ^
+res0: String = 1
+</pre>
 <p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> consoleを実行すると、REPL起動前にコンパイルが実行されます。ここでコンパイルエラーになるとREPLが起動しません。
 console-quickを使うと、コンパイルをせず、クラスパスの追加なしでREPLを起動します。
 しかし、サンプルコードではREPL起動時にnascalaパッケージをインポートするようにsbtで設定しているため、
