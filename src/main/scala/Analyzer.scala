@@ -18,7 +18,8 @@ object Analyzer{
   case class Token(
     name: String,	// 単語の名前
     kind: String,	// 品詞
-    kind2: String	// +αの何か)
+    kind2: String	// +αの何か
+  )
 
   val tokenizer = Tokenizer.builder().build()
 
