@@ -27,8 +27,8 @@ Java HotSpot(TM) 64-Bit Server VM (build 20.12-b01-434, mixed mode)
 
   1. サンプルコードの取得
     #+BEGIN_SRC text
-      > git clone https://github.com/maeda-/nascala-FrequentWords.git
-      (gitがない場合はhttps://github.com/maeda-/nascala-FrequentWordsからZIPをダウンロード)
+      > git clone https://github.com/maedaunderscore/nascala-FrequentWords.git
+      (gitがない場合はhttps://github.com/maedaunderscore/nascala-FrequentWordsからZIPをダウンロード)
     #+END_SRC
     
   2. sbtの起動と実行
