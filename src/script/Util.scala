@@ -12,6 +12,11 @@ object Util{
 
   val tempResource = Path("target/scala-2.10/classes/temp.html", '/').toAbsolute
 
+  /*
+   * この関数で生成したページは
+   * http://localhost:(port)/resources/temp.html
+   * にアクセスすればみれる
+   */ 
   def write(src: scala.xml.Elem){ write(src.toString) }
   def write(src: String){
     tempResource.write(src)

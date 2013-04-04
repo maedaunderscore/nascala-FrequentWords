@@ -1,5 +1,8 @@
 package nascala
 
+/*
+ * 形態素解析を行う
+ */ 
 object Analyzer{
   import org.atilika.kuromoji._
   import scala.collection.JavaConverters._
@@ -12,14 +15,17 @@ object Analyzer{
     count.toSeq.sortWith(desc).take(top)
   }
 
-  case class Token(name: String, kind: String, kind2: String)
+  case class Token(
+    name: String,	// 単語の名前
+    kind: String,	// 品詞
+    kind2: String	// +αの何か)
 
   val tokenizer = Tokenizer.builder().build()
 
   def tokenize(src: String): Seq[Token] = 
     for(token <- tokenizer.tokenize(src).asScala) yield {
       val name = token.getSurfaceForm
-      val Array(kind, kind2, _@_*) =  token.getAllFeaturesArray
+      val Array(kind, kind2, _@_*) =  token.getAllFeaturesArray		// 素人なので何が取れてるのかちゃんと分かってない
       Token(name, kind, kind2)
     }
 

@@ -3,6 +3,9 @@ package nascala
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FreeSpec
 
+/*
+ * 普通のユニットテスト
+ */ 
 class CountingSpec extends FreeSpec with ShouldMatchers{ 
   val tokenSeq = "1,2,3,4,1,2,1,4"
   s"Token Sequence $tokenSeq" - {
@@ -31,6 +34,10 @@ class CountingSpec extends FreeSpec with ShouldMatchers{
   }
 }
 
+
+/*
+ * ScalaCheckを使ったランダムテスト
+ */ 
 import org.scalatest.prop.Checkers
 import org.scalatest.junit.JUnitSuite
 import org.junit.Test
@@ -42,6 +49,9 @@ class CountingByScalaCheck extends Checkers with JUnitSuite {
 
   import nascala.Analyzer._
 
+  /*
+   * Tokenは独自に作った型なので、生成方法を定義する
+   */
   implicit val anyToken = Arbitrary(for {
     x <- arbitrary[String]
   } yield Token(x, "", ""))
@@ -64,6 +74,9 @@ class CountingByScalaCheck extends Checkers with JUnitSuite {
     )
   }
 
+  /*
+   * 別の実装をしてみて、それと一致するかを見る
+   */
   def wordCount(tokens: Seq[Token]): Iterable[Word] = 
     tokens.foldLeft( Map[String, Int]())( (acc, x) => 
       acc.get(x.name) match {

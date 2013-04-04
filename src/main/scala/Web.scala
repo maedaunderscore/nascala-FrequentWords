@@ -1,5 +1,8 @@
 package nascala
 
+/*
+ * Web上から情報を取得するためのモジュール
+ */ 
 object Web{
   import dispatch.classic._
   import dispatch.classic.jsoup.JSoupHttp._

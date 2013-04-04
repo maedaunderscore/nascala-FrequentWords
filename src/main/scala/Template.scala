@@ -2,6 +2,10 @@ package nascala
 
 import scala.xml._
 
+/*
+ * HTML の生成をする
+ * cssなどはsrc/main/resources/においてあるものを参照するようにMain.scalaで実装してある
+ */
 object Template{
   def frequentWordPage(user: String)(words: Seq[Word]) = header(
     <p class="text-left">

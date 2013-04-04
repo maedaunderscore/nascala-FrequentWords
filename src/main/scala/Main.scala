@@ -14,6 +14,9 @@ object Main extends App {
   )
 }
 
+// 単語とその出現回数。
+// この型の値を作って、HTMLに変換して返すのがこのアプリの大まかな流れ
+// 命名ミス。 case class Occrrence(word: String, time: Int) の方がよかった
 case class Word(name: String, occurrence: Int)
 
 object Server extends unfiltered.filter.Plan{
