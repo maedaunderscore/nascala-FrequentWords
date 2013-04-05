@@ -32,7 +32,8 @@ object Analyzer{
 
   def isNoun(token: Token) = token.kind == "名詞" && 
                              Seq("一般", "固有名詞").contains(token.kind2)
-  def isTrivial(token: Token) = token.name.matches("[a-zA-Z0-9]{0,3}")
+  def isTrivial(token: Token) = token.name.toLowerCase != "coq" && 
+                                token.name.matches("[a-zA-Z0-9]{0,3}")
   def onlyNoun(xs: Seq[Token]) = xs.filter(isNoun).filterNot(isTrivial)
 
   def wordCount(tokens: Seq[Token]): Iterable[Word] = 
