@@ -37,11 +37,11 @@ object Server extends unfiltered.filter.Plan{
   object User extends Params.Extract("user", Params.first)
 
   case class ResponseResource(filename: String) extends ResponseStreamer{
+    import scalax.io.JavaConverters._
     def stream(os: java.io.OutputStream) {
       // src/main/resources/ のファイルを取得
       val is = getClass.getClassLoader.getResourceAsStream(filename)
-      // 一文字ずつ読み書きするので、非効率？
-      Iterator.continually(is.read).takeWhile( -1 != _ ).foreach(os.write)
+      is.asInput copyDataTo os.asOutput
     }
   }
 
