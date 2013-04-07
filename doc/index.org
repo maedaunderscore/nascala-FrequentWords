@@ -206,7 +206,7 @@ scala> println(resp)
 # JSoupラッパーを使う
 scala> import dispatch.classic.jsoup.JSoupHttp._
 scala> val resp = Http(url("http://www.scala-lang.org/node/27499").as_jsouped)
-scala> resp.select("div").size)
+scala> resp.select("div").size
 scala> import scala.collection.JavaConverters._
 scala> resp.select("#CommunityProjects ~ p ~ ul li strong").asScala.map(_.text)
 
@@ -243,6 +243,6 @@ Loading src/script/Util.scala...
 defined module Util
 
 scala> val result = Seq(Word("foo", 4), Word("bar", 1))
-scala> Util.show(Template.frequentWordPage("hoge")(result))
+scala> Util.write(Template.frequentWordPage("hoge")(result))
 (別のsbtでサーバを起動した状態で、ブラウザから/resources/temp.htmlを見ると生成したページが表示されます)
 #+END_SRC
