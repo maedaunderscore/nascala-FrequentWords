@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+<title>なごやかScala #11 sbtの使い方とScalaによるアプリケーション実装</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="なごやかScala #11 sbtの使い方とScalaによるアプリケーション実装"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-04-07 23:52:39 JST"/>
+<meta name="author" content="Yasuyuki Maeda(@maeda_)"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="org-mode-document.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">なごやかScala #11 sbtの使い方とScalaによるアプリケーション実装</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 今回のポイント</a></li>
+<li><a href="#sec-2">2 環境の準備</a></li>
+<li><a href="#sec-3">3 サンプルコードを実行する</a>
+<ul>
+<li><a href="#sec-3-1">3.1 新しいプロジェクトを作成する場合</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 サンプルのファイル構成</a></li>
+<li><a href="#sec-5">5 sbt command</a>
+<ul>
+<li><a href="#sec-5-1">5.1 継続実行する</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6 sbtの設定ファイル</a>
+<ul>
+<li><a href="#sec-6-1">6.1 build.sbt</a></li>
+</ul>
+</li>
+<li><a href="#sec-7">7 REPL(Read Eval and Print Loop)</a>
+<ul>
+<li><a href="#sec-7-1">7.1 REPLの特殊なコマンド</a></li>
+<li><a href="#sec-7-2">7.2 REPLのキーバインド</a></li>
+</ul>
+</li>
+<li><a href="#sec-8">8 ライブラリやサンプルコードをREPLから触ってみる</a>
+<ul>
+<li><a href="#sec-8-1">8.1 Webページを取得(dispatch + jsoup)</a></li>
+<li><a href="#sec-8-2">8.2 形態素解析(kuromoji)</a></li>
+<li><a href="#sec-8-3">8.3 HTMLを生成</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 今回のポイント</h2>
+<div class="outline-text-2" id="text-1">
+
+<ul>
+<li>sbt(Scala Build Tool)は、Scala本体や必要なライブラリのダウンロードをしてくれて便利
+</li>
+<li>sbtは、コードの保存を検知して、すぐにテストを実行してくれるので便利
+</li>
+<li>Scalaは、Javaの資産もシームレスに使えるので便利
+</li>
+<li>REPLは、ちょっとしたコードをすぐ試せるので便利
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 環境の準備</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>Java JRE 1.6以降が必要です。
+プロンプトで「java -version」を実行し、
+インストールされているか、パスが通っているか、バージョンは1.6以上か、を確認してください。
+</p>
+
+
+<pre class="example">~/code/scala/nascala &gt; java -version
+java version "1.6.0_37"
+Java(TM) SE Runtime Environment (build 1.6.0_37-b06-434-11M3909)
+Java HotSpot(TM) 64-Bit Server VM (build 20.12-b01-434, mixed mode)
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> サンプルコードを実行する</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>※初回起動時はScala本体と依存ライブラリの大量のダウンロードがあります。
+心の準備をしてください。(10〜20分くらい？)
+</p>
+<ol>
+<li>サンプルコードの取得
+
+
+
+<pre class="example">&gt; git clone https://github.com/maedaunderscore/nascala-FrequentWords.git
+(gitがない場合はhttps://github.com/maedaunderscore/nascala-FrequentWordsからZIPをダウンロード)
+</pre>
+
+
+</li>
+<li>sbtの起動と実行
+
+
+
+<pre class="example">&gt; cd nascala-FrequentWords
+&gt; ./sbt (windowsの場合はsbt.batを実行)
+[info] Loading project definition from /Users/maeda/code/scala/nascala/project
+[info] Set current project to default-04b6c4 (in build file:/Users/maeda/code/scala/nascala/)
+&gt; run
+</pre>
+
+
+</li>
+<li>実行すると、ローカルPC上でWebサーバが起動し、ブラウザでそのページを表示します。
+</li>
+</ol>
+
+
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 新しいプロジェクトを作成する場合</h3>
+<div class="outline-text-3" id="text-3-1">
+
+<p>sbtでは一つのプロジェクトを一つのディレクトリで管理します。<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>
+新しいプロジェクトを作成する場合は下記の流れで始めます。
+</p><ol>
+<li>ディレクトリを作成する
+</li>
+<li>作成したディレクトリへ移動
+</li>
+<li>sbtを実行
+</li>
+</ol>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> サンプルのファイル構成</h2>
+<div class="outline-text-2" id="text-4">
+
+
+
+
+<pre>
+nascala-FrequentWords
+├─ build.sbt                           # sbtの設定ファイル（簡易バージョン）
+├─ project                             # sbtの設定ディレクトリ
+├─ src                                 # ソースコード
+│   ├─ main          
+│   │   ├─ scala                     # 本体のコード
+│   │   │   ├── Main.scala         #   エントリポイント。Webサーバの起動など
+│   │   │   ├── Web.scala          #   Webから情報を取得する
+│   │   │   ├── Analyzer.scala     #   形態素解析をする
+│   │   │   └── Template.scala     #   HTMLを生成する
+│   │   └── resources               # cssなどのリソースファイル
+│   ├─ test                           # テストコード
+│   └─ script                         # REPLからの使用を想定した便利スクリプト
+└─ target                              # ビルドしたものなどが入る
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> sbt command</h2>
+<div class="outline-text-2" id="text-5">
+
+
+<p>
+以下はsbt起動後のプロンプトから使用可能なコマンド例です。
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">コマンド</th><th scope="col" class="left">動作</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">run</td><td class="left">main関数を実行</td></tr>
+<tr><td class="left">test</td><td class="left">テストを実行</td></tr>
+<tr><td class="left">test-only nascala.CountingByScalaCheck</td><td class="left">指定されたテストだけを実行。*などのワイルドカードも使用可能</td></tr>
+<tr><td class="left">console</td><td class="left">REPLを起動</td></tr>
+<tr><td class="left">reload</td><td class="left">sbtの設定を再読み込み</td></tr>
+<tr><td class="left">compile</td><td class="left">コンパイルを実行</td></tr>
+<tr><td class="left">set scalacOptions += "-feature"</td><td class="left">一時的にWarningの詳細を確認するコンパイルオプションを追加<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup></td></tr>
+<tr><td class="left">set scalacOptions += "-deprecation"</td><td class="left">一時的にWarningの詳細を確認するコンパイルオプションを追加<sup><a class="footref" name="fnr.2.2" href="#fn.2">2</a></sup></td></tr>
+<tr><td class="left">set scalaVersion := "2.10.1"</td><td class="left">一時的にScalaのバージョンを設定</td></tr>
+<tr><td class="left">set libraryDependencies += "&hellip;" %% "&hellip;" % "&hellip;"</td><td class="left">一時的に使用するライブラリを追加</td></tr>
+<tr><td class="left">session list</td><td class="left">一時的に設定したものを確認</td></tr>
+<tr><td class="left">session save</td><td class="left">session listの内容をbuild.sbtに保存</td></tr>
+<tr><td class="left">session remove n (nは数字)</td><td class="left">session listの内容のn番目を削除</td></tr>
+</tbody>
+</table>
+
+
+
+</div>
+
+<div id="outline-container-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 継続実行する</h3>
+<div class="outline-text-3" id="text-5-1">
+
+<p>コマンドの前に'~'(チルダ)をつけると、コマンドを継続実行します。
+改行で待ち受け状態をやめて、プロンプトに戻ります。
+</p>
+
+
+<pre class="example">&gt; ~test
+... (テストが実行される) ...
+[info] Passed: : Total 9, Failed 0, Errors 0, Passed 9, Skipped 0
+[success] Total time: 2 s, completed 2013/03/31 15:35:49
+1. Waiting for source changes... (press enter to interrupt)
+... (コードの変更待ち) ...
+... (コードが保存されると、テストが実行される) ...
+[info] Passed: : Total 9, Failed 0, Errors 0, Passed 9, Skipped 0
+[success] Total time: 2 s, completed 2013/03/31 15:35:49
+1. Waiting for source changes... (press enter to interrupt)
+... (Enterを入力) ...
+&gt;
+</pre>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> sbtの設定ファイル</h2>
+<div class="outline-text-2" id="text-6">
+
+<p>簡単に設定を行う場合はbuild.sbtを、込み入った設定を行う場合はproject/build.scalaに設定を記述します。
+サンプルではbuild.sbtを使用しています。
+</p>
+
+</div>
+
+<div id="outline-container-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> build.sbt</h3>
+<div class="outline-text-3" id="text-6-1">
+
+<p>build.sbtはプロジェクトのディレクトリ直下に配置します。
+設定の間には必ず空行が必要です。
+設定例はサンプルコードのbuild.sbtを参照してください。コメントに説明を記載してあります。
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> REPL(Read Eval and Print Loop)</h2>
+<div class="outline-text-2" id="text-7">
+
+<p>sbtのプロンプトでconsoleコマンドを実行すると、
+プロジェクトで使用するライブラリやコードがクラスパスに追加された状態でREPLが起動します。<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>
+ライブラリやコードの動きを確認する場合に便利です。
+</p>
+<p>
+REPLで実行したコードは、ホームディレクトリの.scala_historyに保存されます。
+REPLを終了する場合、:quitと入力するか、Ctrl+Dを押します。
+</p>
+
+</div>
+
+<div id="outline-container-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> REPLの特殊なコマンド</h3>
+<div class="outline-text-3" id="text-7-1">
+
+<p>REPL上で実行可能な:で始まる特殊なコマンドがあります。
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">コマンド</th><th scope="col" class="left">動作</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">:load src/main/scala/Web.scala</td><td class="left">scalaのコードを読み込む</td></tr>
+<tr><td class="left">:paste</td><td class="left">複数行入力するためのモードに入ります</td></tr>
+<tr><td class="left">:help</td><td class="left">ヘルプを見る</td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> REPLのキーバインド</h3>
+<div class="outline-text-3" id="text-7-2">
+
+<p>ScalaのREPLはEmacs風のキーバインドになっています。
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">キーストローク</th><th scope="col" class="left">動作</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">Ctrl + f</td><td class="left">→</td></tr>
+<tr><td class="left">Ctrl + b</td><td class="left">←</td></tr>
+<tr><td class="left">Ctrl + p</td><td class="left">実行したコマンド履歴の一つ前に戻る</td></tr>
+<tr><td class="left">Ctrl + n</td><td class="left">実行したコマンド履歴の一つ先に進める</td></tr>
+<tr><td class="left">Ctrl + a</td><td class="left">行頭に移動</td></tr>
+<tr><td class="left">Ctrl + e</td><td class="left">行末に移動</td></tr>
+<tr><td class="left">Ctrl + r</td><td class="left">コマンド履歴からインクリメンタルサーチ</td></tr>
+<tr><td class="left">Meta + f</td><td class="left">1単語進む</td></tr>
+<tr><td class="left">Meta + b</td><td class="left">1単語戻る</td></tr>
+<tr><td class="left">Ctrl + k</td><td class="left">カーソル位置から行末まで削除</td></tr>
+<tr><td class="left">Ctrl + y</td><td class="left">*** 押しちゃ駄目だ！ *** <sup><a class="footref" name="fnr.4" href="#fn.4">4</a></sup></td></tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> ライブラリやサンプルコードをREPLから触ってみる</h2>
+<div class="outline-text-2" id="text-8">
+
+
+</div>
+
+<div id="outline-container-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> Webページを取得(dispatch + jsoup)</h3>
+<div class="outline-text-3" id="text-8-1">
+
+
+
+
+<pre class="example"># 指定されたURLにアクセスして文字列として取得
+scala&gt; import dispatch.classic._
+scala&gt; val resp = Http(url("http://www.google.co.jp").as_str)
+scala&gt; println(resp)
+
+# JSoupラッパーを使う
+scala&gt; import dispatch.classic.jsoup.JSoupHttp._
+scala&gt; val resp = Http(url("http://www.scala-lang.org/node/27499").as_jsouped)
+scala&gt; resp.select("div").size
+scala&gt; import scala.collection.JavaConverters._
+scala&gt; resp.select("#CommunityProjects ~ p ~ ul li strong").asScala.map(_.text)
+
+# src/main/scala/Web.scalaのコードを呼ぶ
+scala&gt; val resp = Web.extract("http://www.scala-lang.org/node/27499", "#CommunityProjects ~ p ~ ul li strong")
+scala&gt; println(resp)
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> 形態素解析(kuromoji)</h3>
+<div class="outline-text-3" id="text-8-2">
+
+
+
+
+<pre class="example">scala&gt; import org.atilika.kuromoji._
+scala&gt; import scala.collection.JavaConverters._
+scala&gt; val tokenizer = Tokenizer.builder().build()
+scala&gt; val result = tokenizer.tokenize("すもももももももものうち").asScala
+scala&gt; result map (t =&gt; (t.getSurfaceForm, t.getAllFeatures)) foreach println
+scala&gt; val token = result.head
+scala&gt; token.(ここでタブを打つと補完候補が表示される)
+
+# src/main/scala/Analyzer.scalaのコードを呼ぶ
+scala&gt; val result = Analyzer.tokenize("記者が汽車で帰社した")
+scala&gt; result.filter(Analyzer.isNoun).distinct
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-8-3" class="outline-3">
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> HTMLを生成</h3>
+<div class="outline-text-3" id="text-8-3">
+
+<p>src/script/Util.scalaにHTML確認用コードを用意しています。
+</p>
+<p>
+sbtを２つ起動して一つでrunコマンドからサーバーを起動します。
+もうひとつのsbtでconsoleからREPLを起動し、Util.writeメソッドでtemp.htmlに出力されます。
+ブラウザで<a href="http://localhost:(port)">http://localhost:(port)</a>/resources/temp.htmlを開くと出力したページを確認できます。
+</p>
+
+
+
+<pre class="example">scala&gt; :load src/script/Util.scala
+Loading src/script/Util.scala...
+defined module Util
+
+scala&gt; val result = Seq(Word("foo", 4), Word("bar", 1))
+scala&gt; Util.write(Template.frequentWordPage("hoge")(result))
+(別のsbtでサーバを起動した状態で、ブラウザから/resources/temp.htmlを見ると生成したページが表示されます)
+</pre>
+
+
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> ひとつのプロジェクトに複数のサブプロジェクトを含めることも可能です。
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> 明示的な有効化が必要な機能や使用が推奨されていない機能を使用した場合に警告やエラーが発生します。
+詳細を確認する場合はコンパイルオプションを設定して、警告の詳細が確認可能です。
+</p>
+
+
+<pre class="example">&gt; console
+Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
+Type in expressions to have them evaluated.
+Type :help for more information.
+scala&gt; 1 toString
+warning: there were 1 feature warning(s); re-run with -feature for details
+res0: String = 1
+scala&gt; :quit
+&gt; set scalacOptions += "-feature"
+&gt; console
+Welcome to Scala version 2.10.1 (Java HotSpot(TM) 64-Bit Server VM, Java 1.6.0_37).
+Type in expressions to have them evaluated.
+Type :help for more information.
+scala&gt; 1 toString
+&lt;console&gt;:11: warning: postfix operator toString should be enabled
+by making the implicit value language.postfixOps visible.
+This can be achieved by adding the import clause 'import scala.language.postfixOps'
+or by setting the compiler option -language:postfixOps.
+See the Scala docs for value scala.language.postfixOps for a discussion
+why the feature should be explicitly enabled.
+              1 toString
+                ^
+res0: String = 1
+</pre>
+
+
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> consoleを実行すると、REPL起動前にコンパイルが実行されます。ここでコンパイルエラーになるとREPLが起動しません。
+console-quickを使うと、コンパイルをせず、クラスパスの追加なしでREPLを起動します。
+しかし、サンプルコードではREPL起動時にnascalaパッケージをインポートするようにsbtで設定しているため、
+クラスパスを追加しないとエラーが発生し、REPLが起動できません。
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.4" href="#fnr.4">4</a></sup> Ctrl + yでヤンク(ペースト)すると思いきや、sbtがバックグランド実行になって、シェルに戻ってしまいます。
+fgコマンドで復帰できますが、その後のショートカットキーの動作がおかしくなってしまいます。
+(解決方法を知っている方がいたら、教えてください。)
+</p></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2013-04-07 23:52:39 JST</p>
+<p class="author">Author: Yasuyuki Maeda(@maeda_)</p>
+<p class="creator">Org version 7.8.11 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
