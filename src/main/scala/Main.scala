@@ -23,14 +23,20 @@ object Server extends unfiltered.filter.Plan{
   import unfiltered.request._
   import unfiltered.response._
 
+  import scala.util.{Try, Success, Failure}
+  private def main(user: String) = 
+    for{
+      page <- Try { HatenaDiary.page(user) }
+      words <- Try { Analyzer.frequentWords(10)(page) }
+    } yield words
+
   def intent = {
     case Path(Seg("resources":: xs)) => ResponseResource(xs.mkString("/"))
     case Params(User(user)) =>
-      Html5(
-        HatenaDiary.page(user)
-          |> Analyzer.frequentWords(10)
-          |> Template.frequentWordPage(user)
-      )
+      Html5(main(user) match {
+        case Success(words) => Template.frequentWordPage(user)(words)
+        case Failure(ex) => Template.errorPage(ex.getMessage)
+      })
     case _ => Html5(Template.mainPage)
   }
 

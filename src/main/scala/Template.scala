@@ -24,6 +24,11 @@ object Template{
     </form>
   )
 
+  def errorPage(message: String) = header(
+    <h2 class="lead">エラーが発生しました。</h2>
+    <p class="text-left">{message}</p>
+  )
+
   def header(body: NodeSeq) = <html lang="ja"><head>
     <title>なごやかScalaサンプルページ</title>
     <!-- Le styles -->

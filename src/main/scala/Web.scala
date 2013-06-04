@@ -11,7 +11,7 @@ object Web{
   def page(url: String):Document = Http(url.as_jsouped)
   def extract(url: String, selector: String ):String = {
     import scala.collection.JavaConverters._
-    page(url).select(selector).asScala.map(_.text).mkString("¥n")
+    page(url).select(selector).asScala.map(_.text).mkString("\n")
   }
 }
 
